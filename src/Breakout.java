@@ -3,6 +3,7 @@ import acm.program.GraphicsProgram;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.Timer;
+import acm.graphics.GOval;
 
 public class Breakout extends GraphicsProgram {
     public static final int APPLICATION_WIDTH = GameConstants.CANVAS_WIDTH;
@@ -11,8 +12,16 @@ public class Breakout extends GraphicsProgram {
     private final Paddle paddle = new Paddle();
     private final GRect paddleShape =
             new GRect(GameConstants.PADDLE_WIDTH, GameConstants.PADDLE_HEIGHT);
+
+    private final GameEngine gameEngine = new GameEngine();
+    private final Ball ball = new Ball();
+    private final GOval ballShape =
+            new GOval(GameConstants.BALL_DIAMETER, GameConstants.BALL_DIAMETER);
+
     private boolean leftHeld;
     private boolean rightHeld;
+
+    private GameState gameState = GameState.READY;
 
     public static void main(String[] args) {
         new Breakout().start(args);
@@ -22,6 +31,9 @@ public class Breakout extends GraphicsProgram {
     public void run() {
         paddleShape.setFilled(true);
         add(paddleShape, paddle.getX(), GameConstants.PADDLE_Y);
+        ballShape.setFilled(true);
+        syncBallWithPaddle();
+        add(ballShape);
 
         getGCanvas().setFocusable(true);
         addKeyListeners();
@@ -37,6 +49,9 @@ public class Breakout extends GraphicsProgram {
             leftHeld = true;
         } else if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
             rightHeld = true;
+        } else if (event.getKeyCode() == KeyEvent.VK_SPACE && gameState == GameState.READY) {
+            ball.launch();
+            gameState = GameState.RUNNING;
         }
     }
 
@@ -54,19 +69,33 @@ public class Breakout extends GraphicsProgram {
         if (!getGCanvas().isFocusOwner()) {
             leftHeld = false;
             rightHeld = false;
-            return;
         }
 
-        if (leftHeld == rightHeld) {
-            return; // Both arrows are held, or neither is held.
+        if (leftHeld != rightHeld) {
+            if (leftHeld) {
+                paddle.moveLeft();
+            } else {
+                paddle.moveRight();
+            }
+            paddleShape.setLocation(paddle.getX(), GameConstants.PADDLE_Y);
         }
 
-        if (leftHeld) {
-            paddle.moveLeft();
-        } else {
-            paddle.moveRight();
-        }
+        if (gameState == GameState.READY) {
+            syncBallWithPaddle();
+        } else if (gameState == GameState.RUNNING) {
+            gameEngine.updateBall(ball);
 
-        paddleShape.setLocation(paddle.getX(), GameConstants.PADDLE_Y);
+            if (gameEngine.isBallLost(ball)) {
+                gameState = GameState.READY;
+                syncBallWithPaddle();
+            } else {
+                ballShape.setLocation(ball.getX(), ball.getY());
+            }
+        }
+    }
+
+    private void syncBallWithPaddle() {
+        ball.placeAbove(paddle);
+        ballShape.setLocation(ball.getX(), ball.getY());
     }
 }
