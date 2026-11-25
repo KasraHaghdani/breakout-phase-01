@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.Timer;
 import acm.graphics.GOval;
+import acm.graphics.GLabel;
 
 public class Breakout extends GraphicsProgram {
     public static final int APPLICATION_WIDTH = GameConstants.CANVAS_WIDTH;
@@ -19,6 +20,8 @@ public class Breakout extends GraphicsProgram {
             new GOval(GameConstants.BALL_DIAMETER, GameConstants.BALL_DIAMETER);
 
     private boolean leftHeld;
+    private final GLabel livesLabel = new GLabel("Lives: " + gameEngine.getLives());
+
     private boolean rightHeld;
 
     private GameState gameState = GameState.READY;
@@ -34,6 +37,7 @@ public class Breakout extends GraphicsProgram {
         ballShape.setFilled(true);
         syncBallWithPaddle();
         add(ballShape);
+        add(livesLabel, GameConstants.HUD_LEFT, GameConstants.HUD_BASELINE);
 
         getGCanvas().setFocusable(true);
         addKeyListeners();
@@ -66,6 +70,9 @@ public class Breakout extends GraphicsProgram {
 
     @Override
     public void actionPerformed(ActionEvent event) {
+        if (gameState == GameState.GAME_OVER) {
+            return;
+        }
         if (!getGCanvas().isFocusOwner()) {
             leftHeld = false;
             rightHeld = false;
@@ -83,11 +90,10 @@ public class Breakout extends GraphicsProgram {
         if (gameState == GameState.READY) {
             syncBallWithPaddle();
         } else if (gameState == GameState.RUNNING) {
-            gameEngine.updateBall(ball);
+            gameEngine.updateBall(ball, paddle);
 
             if (gameEngine.isBallLost(ball)) {
-                gameState = GameState.READY;
-                syncBallWithPaddle();
+                handleBallLost();
             } else {
                 ballShape.setLocation(ball.getX(), ball.getY());
             }
@@ -97,5 +103,22 @@ public class Breakout extends GraphicsProgram {
     private void syncBallWithPaddle() {
         ball.placeAbove(paddle);
         ballShape.setLocation(ball.getX(), ball.getY());
+    }
+    private void handleBallLost() {
+        gameState = gameEngine.loseLife();
+        livesLabel.setLabel("Lives: " + gameEngine.getLives());
+
+        if (gameState == GameState.READY) {
+            syncBallWithPaddle();
+            return;
+        }
+
+        ballShape.setVisible(false);
+        GLabel message = new GLabel("Game Over");
+        message.setFont("SansSerif-BOLD-32");
+
+        double x = (APPLICATION_WIDTH - message.getWidth()) / 2.0;
+        double y = (APPLICATION_HEIGHT + message.getAscent() - message.getDescent()) / 2.0;
+        add(message, x, y);
     }
 }

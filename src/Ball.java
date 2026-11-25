@@ -14,12 +14,15 @@ public class Ball {
     public double getX() {
         return x;
     }
-
     public double getY() {
         return y;
     }
+
     public void launch() {
-        double angle = Math.toRadians(GameConstants.BALL_LAUNCH_ANGLE);
+        double maxAngle = GameConstants.MAX_BALL_LAUNCH_ANGLE;
+        double degrees = Math.random() * (2 * maxAngle) - maxAngle;
+        double angle = Math.toRadians(degrees);
+
         vx = GameConstants.BALL_SPEED * Math.sin(angle);
         vy = -GameConstants.BALL_SPEED * Math.cos(angle);
     }
@@ -39,5 +42,24 @@ public class Ball {
 
     public void reverseY() {
         vy = -vy;
+    }
+    public boolean isMovingDown() {
+        return vy > 0;
+    }
+
+    public void bounceOffPaddle(Paddle paddle) {
+        double halfPaddle = GameConstants.PADDLE_WIDTH / 2.0;
+        double paddleCenter = paddle.getX() + halfPaddle;
+        double ballCenter = x + GameConstants.BALL_RADIUS;
+
+        double offset = (ballCenter - paddleCenter) / halfPaddle;
+        offset = Math.max(-1.0, Math.min(1.0, offset));
+
+        double angle = Math.toRadians(offset * GameConstants.MAX_PADDLE_BOUNCE_ANGLE);
+        double speed = Math.hypot(vx, vy);
+        vx = speed * Math.sin(angle);
+        vy = -speed * Math.cos(angle);
+
+        y = GameConstants.PADDLE_Y - GameConstants.BALL_DIAMETER;
     }
 }
