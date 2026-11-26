@@ -14,4 +14,12 @@ public class GameConstants {
     public static final int STARTING_LIVES = 3;
     public static final int HUD_LEFT = 12;
     public static final int HUD_BASELINE = 24;
+    public static final int BRICK_ROWS = 5;
+    public static final int BRICK_COLUMNS = 8;
+    public static final int BRICK_WIDTH = 85;
+    public static final int BRICK_HEIGHT = 25;
+    public static final int BRICK_GAP = 6;
+    public static final int BRICK_START_X = 39;
+    public static final int BRICK_START_Y = 60;
+    public static final int POINTS_PER_BRICK = 100;
 }
