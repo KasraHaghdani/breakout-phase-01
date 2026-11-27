@@ -1,5 +1,7 @@
 public class Paddle {
-    private int x = (GameConstants.CANVAS_WIDTH - GameConstants.PADDLE_WIDTH) / 2;
+    private static final int START_X =
+            (GameConstants.CANVAS_WIDTH - GameConstants.PADDLE_WIDTH) / 2;
+    private int x = START_X;
 
     public int getX() {
         return x;
@@ -12,5 +14,8 @@ public class Paddle {
     public void moveRight() {
         int rightLimit = GameConstants.CANVAS_WIDTH - GameConstants.PADDLE_WIDTH;
         x = Math.min(rightLimit, x + GameConstants.PADDLE_SPEED);
+    }
+    public void resetPosition() {
+        x = START_X;
     }
 }

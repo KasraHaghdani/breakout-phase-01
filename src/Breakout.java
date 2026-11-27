@@ -29,6 +29,8 @@ public class Breakout extends GraphicsProgram {
 
     private boolean rightHeld;
 
+    private boolean pauseKeyHeld;
+
     private GameState gameState = GameState.READY;
 
     public static void main(String[] args) {
@@ -45,6 +47,9 @@ public class Breakout extends GraphicsProgram {
         add(ballShape);
         updateHud();
         add(hudLabel, GameConstants.HUD_LEFT, GameConstants.HUD_BASELINE);
+        statusLabel.setFont("SansSerif-BOLD-32");
+        statusLabel.setVisible(false);
+        add(statusLabel);
 
         getGCanvas().setFocusable(true);
         addKeyListeners();
@@ -56,6 +61,15 @@ public class Breakout extends GraphicsProgram {
 
     @Override
     public void keyPressed(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.VK_R) {
+            restartRound();
+            return;
+        }
+        if (event.getKeyCode() == KeyEvent.VK_P && !pauseKeyHeld) {
+            pauseKeyHeld = true;
+            togglePause();
+            return;
+        }
         if (event.getKeyCode() == KeyEvent.VK_LEFT) {
             leftHeld = true;
         } else if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -72,12 +86,22 @@ public class Breakout extends GraphicsProgram {
             leftHeld = false;
         } else if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
             rightHeld = false;
+        } else if (event.getKeyCode() == KeyEvent.VK_P) {
+            pauseKeyHeld = false;
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (gameState == GameState.GAME_OVER) {
+        if (!getGCanvas().isFocusOwner()) {
+            leftHeld = false;
+            rightHeld = false;
+            pauseKeyHeld = false;
+        }
+
+        if (gameState == GameState.PAUSED
+                || gameState == GameState.GAME_OVER
+                || gameState == GameState.VICTORY) {
             return;
         }
         if (!getGCanvas().isFocusOwner()) {
@@ -100,6 +124,13 @@ public class Breakout extends GraphicsProgram {
             if (gameEngine.updateBall(ball, paddle)) {
                 refreshBricks();
                 updateHud();
+
+                if (gameEngine.hasWon()) {
+                    gameState = GameState.VICTORY;
+                    ballShape.setLocation(ball.getX(), ball.getY());
+                    showStatusMessage("You win! Score: " + gameEngine.getScore());
+                    return;
+                }
             }
 
             if (gameEngine.isBallLost(ball)) {
@@ -124,12 +155,7 @@ public class Breakout extends GraphicsProgram {
         }
 
         ballShape.setVisible(false);
-        GLabel message = new GLabel("Game Over");
-        message.setFont("SansSerif-BOLD-32");
-
-        double x = (APPLICATION_WIDTH - message.getWidth()) / 2.0;
-        double y = (APPLICATION_HEIGHT + message.getAscent() - message.getDescent()) / 2.0;
-        add(message, x, y);
+        showStatusMessage("Game Over");
     }
     private void drawBricks() {
         for (int row = 0; row < GameConstants.BRICK_ROWS; row++) {
@@ -155,5 +181,39 @@ public class Breakout extends GraphicsProgram {
         hudLabel.setLabel("Lives: " + gameEngine.getLives()
                 + "   Score: " + gameEngine.getScore()
                 + "   High score: " + gameEngine.getHighScore());
+    }
+    private final GLabel statusLabel = new GLabel("");
+    private void restartRound() {
+        gameEngine.resetRound();
+        gameState = GameState.READY;
+        leftHeld = false;
+        rightHeld = false;
+
+        paddle.resetPosition();
+        paddleShape.setLocation(paddle.getX(), GameConstants.PADDLE_Y);
+        syncBallWithPaddle();
+        ballShape.setVisible(true);
+        statusLabel.setVisible(false);
+
+        refreshBricks();
+        updateHud();
+    }
+
+    private void showStatusMessage(String text) {
+        statusLabel.setLabel(text);
+        double x = (APPLICATION_WIDTH - statusLabel.getWidth()) / 2.0;
+        double y = (APPLICATION_HEIGHT + statusLabel.getAscent()
+                - statusLabel.getDescent()) / 2.0;
+        statusLabel.setLocation(x, y);
+        statusLabel.setVisible(true);
+    }
+    private void togglePause() {
+        if (gameState == GameState.RUNNING) {
+            gameState = GameState.PAUSED;
+            showStatusMessage("Paused");
+        } else if (gameState == GameState.PAUSED) {
+            gameState = GameState.RUNNING;
+            statusLabel.setVisible(false);
+        }
     }
 }

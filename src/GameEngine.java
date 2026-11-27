@@ -7,6 +7,16 @@ public class GameEngine {
 
     public GameEngine(HighScoreStorage highScoreStorage) {
         this.highScoreStorage = highScoreStorage;
+        createBricks();
+    }
+
+    public void resetRound() {
+        score = 0;
+        lives = GameConstants.STARTING_LIVES;
+        createBricks();
+    }
+
+    private void createBricks() {
         for (int row = 0; row < GameConstants.BRICK_ROWS; row++) {
             for (int col = 0; col < GameConstants.BRICK_COLUMNS; col++) {
                 int x = GameConstants.BRICK_START_X
@@ -33,7 +43,16 @@ public class GameEngine {
     public int getHighScore() {
         return highScoreStorage.loadHighScore();
     }
-
+    public boolean hasWon() {
+        for (Brick[] row : bricks) {
+            for (Brick brick : row) {
+                if (!brick.isDestroyed()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     private void recordHighScore() {
         if (score > getHighScore()) {
             highScoreStorage.saveHighScore(score);
@@ -97,6 +116,11 @@ public class GameEngine {
                 if (!brick.isDestroyed() && bounceOffBrick(ball, brick)) {
                     brick.hit();
                     score += GameConstants.POINTS_PER_BRICK;
+
+                    if (hasWon()) {
+                        recordHighScore();
+                    }
+
                     return true;
                 }
             }
