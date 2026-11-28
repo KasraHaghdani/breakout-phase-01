@@ -40,6 +40,7 @@ public class Breakout extends GraphicsProgram {
     @Override
     public void run() {
         drawBricks();
+        refreshBricks();
         paddleShape.setFilled(true);
         add(paddleShape, paddle.getX(), GameConstants.PADDLE_Y);
         ballShape.setFilled(true);
@@ -164,7 +165,7 @@ public class Breakout extends GraphicsProgram {
                 GRect shape = new GRect(GameConstants.BRICK_WIDTH, GameConstants.BRICK_HEIGHT);
                 shape.setFilled(true);
                 int colorIndex = (int) (Math.random() * BRICK_COLORS.length);
-                shape.setFillColor(BRICK_COLORS[colorIndex]);
+                shape.setColor(BRICK_COLORS[colorIndex]);
                 brickShapes[row][col] = shape;
                 add(shape, brick.getX(), brick.getY());
             }
@@ -174,7 +175,16 @@ public class Breakout extends GraphicsProgram {
         for (int row = 0; row < GameConstants.BRICK_ROWS; row++) {
             for (int col = 0; col < GameConstants.BRICK_COLUMNS; col++) {
                 Brick brick = gameEngine.getBrick(row, col);
-                brickShapes[row][col].setVisible(!brick.isDestroyed());
+                GRect shape = brickShapes[row][col];
+                Color baseColor = shape.getColor();
+
+                if (brick.getHitsRemaining() > GameConstants.NORMAL_BRICK_HITS) {
+                    shape.setFillColor(baseColor.darker());
+                } else {
+                    shape.setFillColor(baseColor);
+                }
+
+                shape.setVisible(!brick.isDestroyed());
             }
         }
     }

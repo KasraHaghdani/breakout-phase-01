@@ -23,7 +23,10 @@ public class GameEngine {
                         + col * (GameConstants.BRICK_WIDTH + GameConstants.BRICK_GAP);
                 int y = GameConstants.BRICK_START_Y
                         + row * (GameConstants.BRICK_HEIGHT + GameConstants.BRICK_GAP);
-                bricks[row][col] = new Brick(x, y);
+                int hits = row == 0
+                        ? GameConstants.REINFORCED_BRICK_HITS
+                        : GameConstants.NORMAL_BRICK_HITS;
+                bricks[row][col] = new Brick(x, y, hits);
             }
         }
     }
@@ -115,10 +118,12 @@ public class GameEngine {
             for (Brick brick : row) {
                 if (!brick.isDestroyed() && bounceOffBrick(ball, brick)) {
                     brick.hit();
-                    score += GameConstants.POINTS_PER_BRICK;
 
-                    if (hasWon()) {
-                        recordHighScore();
+                    if (brick.isDestroyed()) {
+                        score += GameConstants.POINTS_PER_BRICK;
+                        if (hasWon()) {
+                            recordHighScore();
+                        }
                     }
 
                     return true;

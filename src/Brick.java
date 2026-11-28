@@ -1,11 +1,12 @@
 public class Brick {
     private final int x;
     private final int y;
-    private boolean destroyed;
+    private int hitsRemaining;
 
-    public Brick(int x, int y) {
+    public Brick(int x, int y, int hitsRemaining) {
         this.x = x;
         this.y = y;
+        this.hitsRemaining = hitsRemaining;
     }
 
     public int getX() {
@@ -15,11 +16,18 @@ public class Brick {
     public int getY() {
         return y;
     }
+
+    public int getHitsRemaining() {
+        return hitsRemaining;
+    }
+
     public boolean isDestroyed() {
-        return destroyed;
+        return hitsRemaining == 0;
     }
 
     public void hit() {
-        destroyed = true;
+        if (hitsRemaining > 0) {
+            hitsRemaining--;
+        }
     }
 }

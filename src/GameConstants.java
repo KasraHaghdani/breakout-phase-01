@@ -22,4 +22,6 @@ public class GameConstants {
     public static final int BRICK_START_X = 39;
     public static final int BRICK_START_Y = 60;
     public static final int POINTS_PER_BRICK = 100;
+    public static final int NORMAL_BRICK_HITS = 1;
+    public static final int REINFORCED_BRICK_HITS = 2;
 }
