@@ -163,7 +163,8 @@ public class Breakout extends GraphicsProgram {
                 Brick brick = gameEngine.getBrick(row, col);
                 GRect shape = new GRect(GameConstants.BRICK_WIDTH, GameConstants.BRICK_HEIGHT);
                 shape.setFilled(true);
-                shape.setFillColor(Color.ORANGE);
+                int colorIndex = (int) (Math.random() * BRICK_COLORS.length);
+                shape.setFillColor(BRICK_COLORS[colorIndex]);
                 brickShapes[row][col] = shape;
                 add(shape, brick.getX(), brick.getY());
             }
@@ -207,6 +208,14 @@ public class Breakout extends GraphicsProgram {
         statusLabel.setLocation(x, y);
         statusLabel.setVisible(true);
     }
+    private static final Color[] BRICK_COLORS = {
+            new Color(241, 119, 119),
+            new Color(255, 184, 100),
+            new Color(247, 216, 106),
+            new Color(126, 203, 153),
+            new Color(116, 186, 242),
+            new Color(182, 151, 249)
+    };
     private void togglePause() {
         if (gameState == GameState.RUNNING) {
             gameState = GameState.PAUSED;
